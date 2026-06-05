@@ -16,7 +16,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+# 🔹 To'g'ri import: 'main' ilovasi ichidagi views.py dan olamiz
+from main.views import ariza_view
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('admin/', admin.site.urls),  # Admin panel yo'li (bu turishi shart)
+    path('ariza/', ariza_view, name='ariza_url'),  # Arizani ochish yo'li
 ]
