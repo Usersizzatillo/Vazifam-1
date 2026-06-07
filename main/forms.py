@@ -1,36 +1,30 @@
 from django import forms
+from .models import Mahsulot
 
-class KursArizaForm(forms.Form):
-    YONALISHLAR = [
-        ('backend', 'Backend'),
-        ('frontend', 'Frontend'),
-        ('dizayn', 'Dizayn'),
-    ]
+class MahsulotForm(forms.ModelForm):
+    class Meta:
+        model = Mahsulot
+        fields = ['nomi', 'narx', 'kategoriya', 'soni', 'faol', 'tavsif']
+        widgets = {
+            'nomi': forms.TextInput(attrs={'class': 'form-control'}),
+            'narx': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'kategoriya': forms.Select(attrs={'class': 'form-select'}),
+            'soni': forms.NumberInput(attrs={'class': 'form-control'}),
+            'faol': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'tavsif': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        }
 
-    toliq_ism = forms.CharField(
-        label="Ism va familiyangiz", 
-        max_length=100,
-        widget=forms.TextInput(attrs={'class': 'form-control'}) # Bootstrap klassi
-    )
-    telefon = forms.CharField(
-        label="Telefon raqamingiz",
-        help_text="Format: +99890...",
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': '+998'})
-    )
-    yosh = forms.IntegerField(
-        label="Yoshingiz",
-        widget=forms.NumberInput(attrs={'class': 'form-control'})
-    )
-    yonalish = forms.ChoiceField(
-        label="Yo'nalishni tanlang", 
-        choices=YONALISHLAR,
-        widget=forms.Select(attrs={'class': 'form-select'}) # Select uchun maxsus klass
-    )
-    # BooleanField (checkbox) uchun form-control shart emas, u o'zi chiroyli chiqadi
-    tajriba_bor = forms.BooleanField(label="Dasturlash tajribangiz bormi?", required=False)
-    
-    qoshimcha = forms.CharField(
-        label="Qo'shimcha izoh", 
-        required=False,
-        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3})
-    )
+    def clean_narx(self):
+        narx = self.cleaned_data.get('narx')
+        if narx is not None and narx <= 0:
+            raise forms.ValidationError("Mahsulot narxi 0 dan katta bo'lishi kerak!")
+        return narx
+
+    def clean(self):
+        cleaned_data = super().clean()
+        faol = cleaned_data.get('faol')
+        soni = cleaned_data.get('soni')
+
+        if faol is True and (soni is None or soni == 0):
+            raise forms.ValidationError("Sotuvdagi mahsulotning soni omborda 0 bo'lishi mumkin emas!")
+        return cleaned_data

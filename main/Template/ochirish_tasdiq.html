@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <title>O'chirishni tasdiqlash</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<div class="container mt-5" style="max-width: 450px;">
+    <div class="card border-danger p-4 shadow">
+        <h4 class="text-danger mb-3">Mahsulotni o'chirish</h4>
+        <p>Rostdan ham <strong>"{{ mahsulot.nomi }}"</strong> mahsulotini o'chirishni xohlaysizmi?</p>
+        <form method="post">
+            {% csrf_token %}
+            <div class="d-flex justify-content-between mt-4">
+                <a href="{% url 'royxat' %}" class="btn btn-secondary">Bekor qilish</a>
+                <button type="submit" class="btn btn-danger">O'chirish</button>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>

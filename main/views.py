@@ -1,35 +1,35 @@
-from django.shortcuts import render, redirect
-from django.contrib import messages  # Bonus topshiriq uchun
-from .forms import KursArizaForm
-from .models import KursAriza
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import Mahsulot
+from .forms import MahsulotForm
 
-def ariza_view(request):
+def royxat_view(request):
+    mahsulotlar = Mahsulot.objects.all().order_by('-id')
+    return render(request, 'royxat.html', {'mahsulotlar': mahsulotlar})
+
+def qoshish_view(request):
     if request.method == 'POST':
-        # Agar foydalanuvchi tugmani bosgan bo'lsa, kelgan ma'lumotlar formaga yuklanadi
-        form = KursArizaForm(request.POST)
-        
-        # Formadagi barcha qoidalar (clean metodlari) tekshiriladi
+        form = MahsulotForm(request.POST)
         if form.is_valid():
-            # Ma'lumotlar tozalangan va xavfsiz holatda cleaned_data'ga o'tadi
-            data = form.cleaned_data
-            
-            # KursAriza modeliga ma'lumotlarni qo'lda saqlaymiz
-            KursAriza.objects.create(
-                toliq_ism=data['toliq_ism'],
-                telefon=data['telefon'],
-                yosh=data['yosh'],
-                yonalish=data['yonalish'],
-                tajriba_bor=data['tajriba_bor'],
-                qoshimcha=data['qoshimcha']
-            )
-            
-            # Bonus topshiriq: Muvaffaqiyat xabari
-            messages.success(request, "Arizangiz muvaffaqiyatli qabul qilindi!")
-            
-            # PRG (Post/Redirect/Get) patterni: sahifani qayta yuklaganda ma'lumot takroran ketmasligi uchun redirect qilinadi
-            return redirect('ariza_url_nomi') 
+            form.save()
+            return redirect('royxat')
     else:
-        # Agar foydalanuvchi sahifaga shunchaki kirgan bo'lsa (GET so'rovi), bo'sh forma ko'rsatamiz
-        form = KursArizaForm()
-        
-    return render(request, 'ariza.html', {'form': form})
+        form = MahsulotForm()
+    return render(request, 'forma.html', {'form': form, 'sarlavha': "Yangi mahsulot qo'shish"})
+
+def tahrirlash_view(request, pk):
+    mahsulot = get_object_or_404(Mahsulot, pk=pk)
+    if request.method == 'POST':
+        form = MahsulotForm(request.POST, instance=mahsulot)
+        if form.is_valid():
+            form.save()
+            return redirect('royxat')
+    else:
+        form = MahsulotForm(instance=mahsulot)
+    return render(request, 'forma.html', {'form': form, 'sarlavha': "Mahsulotni tahrirlash"})
+
+def ochirish_view(request, pk):
+    mahsulot = get_object_or_404(Mahsulot, pk=pk)
+    if request.method == 'POST':
+        mahsulot.delete()
+        return redirect('royxat')
+    return render(request, 'ochirish_tasdiq.html', {'mahsulot': mahsulot})

@@ -1,25 +1,23 @@
 from django.db import models
 
-class KursAriza(models.Model):
-    # ... (eski maydonlar o'zgarishsiz qoladi) ...
-    YONALISHLAR = [
-        ('backend', 'Backend'),
-        ('frontend', 'Frontend'),
-        ('dizayn', 'Dizayn'),
+class Mahsulot(models.Model):
+    KATEGORIYALAR = [
+        ('oziq-ovqat', 'Oziq-ovqat'),
+        ('kiyim', 'Kiyim'),
+        ('texnika', 'Texnika'),
     ]
 
-    toliq_ism = models.CharField(max_length=100)
-    telefon = models.CharField(max_length=20)
-    yosh = models.PositiveIntegerField()
-    yonalish = models.CharField(max_length=20, choices=YONALISHLAR)
-    tajriba_bor = models.BooleanField(default=False)
-    qoshimcha = models.TextField(blank=True)
-    yuborilgan_sana = models.DateTimeField(auto_now_add=True)
+    nomi = models.CharField(max_length=150)
+    narx = models.DecimalField(max_digits=10, decimal_places=2)
+    kategoriya = models.CharField(max_length=50, choices=KATEGORIYALAR)
+    soni = models.PositiveIntegerField()
+    faol = models.BooleanField(default=True)
+    tavsif = models.TextField(blank=True)
+    qoshilgan_sana = models.DateTimeField(auto_now_add=True)
 
-    # 🔹 Mana shu qismni qo'shasiz:
     class Meta:
-        verbose_name = "Kurs arizasi"
-        verbose_name_plural = "Kurs arizalari"
+        verbose_name = "Mahsulot"
+        verbose_name_plural = "Mahsulotlar"
 
     def __str__(self):
-        return self.toliq_ism
+        return self.nomi
