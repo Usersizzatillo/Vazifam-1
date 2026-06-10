@@ -28,3 +28,4 @@ class MahsulotForm(forms.ModelForm):
         if faol is True and (soni is None or soni == 0):
             raise forms.ValidationError("Sotuvdagi mahsulotning soni omborda 0 bo'lishi mumkin emas!")
         return cleaned_data
+    

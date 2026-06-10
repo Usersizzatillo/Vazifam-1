@@ -1,57 +1,26 @@
 <!DOCTYPE html>
-<html lang="uz">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Mahsulotlar ro'yxati</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>{{ sarlavha }}</title>
 </head>
-<body class="bg-light">
-<div class="container mt-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Mahsulotlar Ro'yxati</h2>
-        <a href="{% url 'qoshish' %}" class="btn btn-primary">+ Yangi Qo'shish</a>
-    </div>
-    <div class="card shadow-sm p-3">
-        <table class="table table-striped table-hover align-middle">
-            <thead class="table-dark">
-                <tr>
-                    <th>ID</th>
-                    <th>Nomi</th>
-                    <th>Narxi</th>
-                    <th>Kategoriya</th>
-                    <th>Soni</th>
-                    <th>Holati</th>
-                    <th class="text-center">Amallar</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for m in mahsulotlar %}
-                <tr>
-                    <td>{{ m.id }}</td>
-                    <td><strong>{{ m.nomi }}</strong></td>
-                    <td>{{ m.narx }} so'm</td>
-                    <td class="text-capitalize">{{ m.kategoriya }}</td>
-                    <td>{{ m.soni }} ta</td>
-                    <td>
-                        {% if m.faol %}
-                            <span class="badge bg-success">Sotuvda</span>
-                        {% else %}
-                            <span class="badge bg-secondary">Noaktiv</span>
-                        {% endif %}
-                    </td>
-                    <td class="text-center">
-                        <a href="{% url 'tahrirlash' m.id %}" class="btn btn-sm btn-warning me-1">Tahrir</a>
-                        <a href="{% url 'ochirish' m.id %}" class="btn btn-sm btn-danger">O'chirish</a>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="7" class="text-center text-muted py-4">Hozircha mahsulotlar kiritilmagan.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</div>
+<body>
+
+<h1>{{ sarlavha }}</h1>
+
+<p>Jami maqolalar: {{ jami }}</p>
+
+{% for m in maqolalar %}
+    <h3>
+        <a href="{% url 'detail' m.pk %}">
+            {{ m.sarlavha }}
+        </a>
+    </h3>
+
+    <p>Muallif: {{ m.muallif }}</p>
+    <hr>
+{% empty %}
+    <p>Maqola topilmadi.</p>
+{% endfor %}
+
 </body>
 </html>

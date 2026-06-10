@@ -1,35 +1,33 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from .models import Mahsulot
-from .forms import MahsulotForm
+from django.views.generic import ListView, DetailView, TemplateView, RedirectView
+from .models import Maqola
 
-def royxat_view(request):
-    mahsulotlar = Mahsulot.objects.all().order_by('-id')
-    return render(request, 'royxat.html', {'mahsulotlar': mahsulotlar})
 
-def qoshish_view(request):
-    if request.method == 'POST':
-        form = MahsulotForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('royxat')
-    else:
-        form = MahsulotForm()
-    return render(request, 'forma.html', {'form': form, 'sarlavha': "Yangi mahsulot qo'shish"})
+class MaqolaList(ListView):
+    model = Maqola
+    template_name = 'royxat.html'
+    context_object_name = 'maqolalar'
 
-def tahrirlash_view(request, pk):
-    mahsulot = get_object_or_404(Mahsulot, pk=pk)
-    if request.method == 'POST':
-        form = MahsulotForm(request.POST, instance=mahsulot)
-        if form.is_valid():
-            form.save()
-            return redirect('royxat')
-    else:
-        form = MahsulotForm(instance=mahsulot)
-    return render(request, 'forma.html', {'form': form, 'sarlavha': "Mahsulotni tahrirlash"})
+    def get_queryset(self):
+        return Maqola.objects.filter(
+            chop_etilgan=True
+        ).order_by('-sana')
 
-def ochirish_view(request, pk):
-    mahsulot = get_object_or_404(Mahsulot, pk=pk)
-    if request.method == 'POST':
-        mahsulot.delete()
-        return redirect('royxat')
-    return render(request, 'ochirish_tasdiq.html', {'mahsulot': mahsulot})
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['jami'] = Maqola.objects.count()
+        context['sarlavha'] = 'Barcha maqolalar roʻyxati'
+        return context
+
+
+class MaqolaDetail(DetailView):
+    model = Maqola
+    template_name = 'detail.html'
+    context_object_name = 'maqola'
+
+
+class BizHaqimizda(TemplateView):
+    template_name = 'about.html'
+
+
+class EskiBlog(RedirectView):
+    pattern_name = 'royxat'

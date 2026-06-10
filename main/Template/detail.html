@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ maqola.sarlavha }}</title>
+</head>
+<body>
+
+<h1>{{ maqola.sarlavha }}</h1>
+
+<p><b>Muallif:</b> {{ maqola.muallif }}</p>
+<p><b>Ko'rishlar:</b> {{ maqola.korishlar }}</p>
+
+<p>{{ maqola.matn }}</p>
+
+<a href="{% url 'royxat' %}">Orqaga</a>
+
+</body>
+</html>

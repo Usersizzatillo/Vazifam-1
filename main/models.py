@@ -1,23 +1,12 @@
 from django.db import models
 
-class Mahsulot(models.Model):
-    KATEGORIYALAR = [
-        ('oziq-ovqat', 'Oziq-ovqat'),
-        ('kiyim', 'Kiyim'),
-        ('texnika', 'Texnika'),
-    ]
-
-    nomi = models.CharField(max_length=150)
-    narx = models.DecimalField(max_digits=10, decimal_places=2)
-    kategoriya = models.CharField(max_length=50, choices=KATEGORIYALAR)
-    soni = models.PositiveIntegerField()
-    faol = models.BooleanField(default=True)
-    tavsif = models.TextField(blank=True)
-    qoshilgan_sana = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        verbose_name = "Mahsulot"
-        verbose_name_plural = "Mahsulotlar"
+class Maqola(models.Model):
+    sarlavha = models.CharField(max_length=200)
+    muallif = models.CharField(max_length=100)
+    matn = models.TextField()
+    korishlar = models.PositiveIntegerField(default=0)
+    chop_etilgan = models.BooleanField(default=False)
+    sana = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.nomi
+        return self.sarlavha

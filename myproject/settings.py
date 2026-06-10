@@ -55,7 +55,8 @@ ROOT_URLCONF = 'myproject.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'main' / 'Template'], # main papkasining ichida ekanligini ko'rsatamiz
+        
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -64,7 +65,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
             ],
         },
-    },
+    }, # <--- This right here needs to be a curly brace } instead of a bracket ]
 ]
 
 WSGI_APPLICATION = 'myproject.wsgi.application'

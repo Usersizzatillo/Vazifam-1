@@ -12,7 +12,6 @@ from main.models import Branch, Student, Subject, Teacher, Room, Group
 
 print("Eski ma'lumotlar tozalanmoqda...")
 
-# Dublikat bo'lmasligi uchun hamma narsani tozalaymiz
 Student.objects.all().delete()
 Group.objects.all().delete()
 Room.objects.all().delete()
@@ -25,14 +24,14 @@ b1 = Branch.objects.create(name="Toshkent Filiali")
 b2 = Branch.objects.create(name="Farg'ona Filiali")
 branches = [b1, b2]
 
-# 2. Fanlar yaratish
+
 s1 = Subject.objects.create(name="Python Dasturlash", description="Python asoslari va Django")
 s2 = Subject.objects.create(name="Frontend", description="HTML, CSS, JavaScript va React")
 s3 = Subject.objects.create(name="Backend", description="Node.js va ma'lumotlar bazasi")
 s4 = Subject.objects.create(name="Matematika", description="Oliy matematika va mantiq")
 s5 = Subject.objects.create(name="Ingliz tili", description="IELTS va Speaking")
 
-# 3. 10 ta guruh yaratish
+
 groups_pool = [
     Group.objects.create(name="Python-01 (Ertalabki)", subject=s1),
     Group.objects.create(name="Python-02 (Kechki)", subject=s1),
@@ -46,7 +45,7 @@ groups_pool = [
     Group.objects.create(name="English-Kids", subject=s5),
 ]
 
-# 4. 15 ta O'qituvchilarni avtomatik yaratish 🚀
+
 print("15 ta tajribali o'qituvchi bazaga qo'shilmoqda...")
 oat_ism = ["Anvar", "Zilola", "Bobur", "Nodira", "Jasur", "Malika", "Sardor", "Gulnoza", "Farruh", "Shaxnoza", "Dilshod", "Laylo", "Olim", "Eldor", "Kamola"]
 oat_familiya = ["Aliyev", "Karimova", "Soliyeff", "Umarova", "Toshpulatov", "Aslanova", "Hikmatov", "X Khalilova", "Rustamov", "Ismoilova", "Jo'rayev", "Ahmedova", "G'ofurov", "Sultonov", "Abduvaliyeva"]
@@ -57,11 +56,11 @@ for i in range(15):
         last_name=oat_familiya[i],
         phone=f"+99893{random.randint(1000000, 9999999)}",
         email=f"{oat_ism[i].lower()}{i}@gmail.com",
-        salary=random.randint(4000000, 9000000), # 4 mln dan 9 mln gacha maosh
-        branch=random.choice(branches) # Tasodifiy filial
+        salary=random.randint(4000000, 9000000), 
+        branch=random.choice(branches) 
     )
 
-# 5. 350 ta O'quvchilarni avtomatik yaratish
+
 print("350 ta o'quvchi guruhlarga taqsimlanmoqda...")
 viloyatlar = ["Toshkent", "Farg'ona", "Andijon", "Namangan", "Samarqand", "Buxoro", "Xorazm", "Navoiy", "Qashqadaryo"]
 
