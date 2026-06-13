@@ -1,14 +1,9 @@
 from django.urls import path
-from .views import (
-    MaqolaList,
-    MaqolaDetail,
-    BizHaqimizda,
-    EskiBlog,
-)
+from .views import TalabaList, TalabaCreate, TalabaUpdate, TalabaDelete
 
 urlpatterns = [
-    path('', MaqolaList.as_view(), name='royxat'),
-    path('<int:pk>/', MaqolaDetail.as_view(), name='detail'),
-    path('about/', BizHaqimizda.as_view(), name='about'),
-    path('eski-blog/', EskiBlog.as_view(), name='eski_blog'),
+    path('', TalabaList.as_view(), name='royxat'),
+    path('yangi/', TalabaCreate.as_view(), name='create'),
+    path('<int:pk>/tahrir/', TalabaUpdate.as_view(), name='update'),
+    path('<int:pk>/ochir/', TalabaDelete.as_view(), name='delete'),
 ]

@@ -1,0 +1,10 @@
+<h2>{% if object %}Talaba Ma'lumotlarini Tahrirlash{% else %}Yangi Talaba Qo'shish{% endif %}</h2>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Saqlash</button>
+</form>
+
+<br>
+<a href="{% url 'royxat' %}">Orqaga qaytish</a>

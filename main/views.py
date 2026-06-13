@@ -1,33 +1,33 @@
-from django.views.generic import ListView, DetailView, TemplateView, RedirectView
-from .models import Maqola
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.urls import reverse_lazy
+from .models import Talaba
 
-
-class MaqolaList(ListView):
-    model = Maqola
+# 1. Talabalar ro'yxati (ListView)
+class TalabaList(ListView):
+    model = Talaba
     template_name = 'royxat.html'
-    context_object_name = 'maqolalar'
+    context_object_name = 'talabalar'
 
-    def get_queryset(self):
-        return Maqola.objects.filter(
-            chop_etilgan=True
-        ).order_by('-sana')
+# 2. Yangi talaba qo'shish (CreateView)
+class TalabaCreate(LoginRequiredMixin, CreateView):
+    model = Talaba
+    fields = ['ism', 'familiya', 'guruh', 'yosh', 'faol']
+    template_name = 'maqola_form.html'
+    success_url = reverse_lazy('royxat')
+    login_url = '/login/'
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['jami'] = Maqola.objects.count()
-        context['sarlavha'] = 'Barcha maqolalar roʻyxati'
-        return context
+# 3. Talaba ma'lumotlarini tahrirlash (UpdateView)
+class TalabaUpdate(LoginRequiredMixin, UpdateView):
+    model = Talaba
+    fields = ['ism', 'familiya', 'guruh', 'yosh', 'faol']
+    template_name = 'maqola_form.html'
+    success_url = reverse_lazy('royxat')
+    login_url = '/login/'
 
-
-class MaqolaDetail(DetailView):
-    model = Maqola
-    template_name = 'detail.html'
-    context_object_name = 'maqola'
-
-
-class BizHaqimizda(TemplateView):
-    template_name = 'about.html'
-
-
-class EskiBlog(RedirectView):
-    pattern_name = 'royxat'
+# 4. Talabani o'chirish (DeleteView)
+class TalabaDelete(LoginRequiredMixin, DeleteView):
+    model = Talaba
+    template_name = 'maqola_confirm_delete.html'
+    success_url = reverse_lazy('royxat')
+    login_url = '/login/'

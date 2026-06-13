@@ -1,26 +1,15 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>{{ sarlavha }}</title>
-</head>
-<body>
+<h2>Talabalar Ro'yxati</h2>
+<a href="{% url 'create' %}">➕ Yangi Talaba Qo'shish</a>
+<hr>
 
-<h1>{{ sarlavha }}</h1>
-
-<p>Jami maqolalar: {{ jami }}</p>
-
-{% for m in maqolalar %}
-    <h3>
-        <a href="{% url 'detail' m.pk %}">
-            {{ m.sarlavha }}
-        </a>
-    </h3>
-
-    <p>Muallif: {{ m.muallif }}</p>
-    <hr>
-{% empty %}
-    <p>Maqola topilmadi.</p>
-{% endfor %}
-
-</body>
-</html>
+<ul>
+    {% for talaba in talabalar %}
+        <li>
+            <strong>{{ talaba.ism }} {{ talaba.familiya }}</strong> (Guruh: {{ talaba.guruh }}, Yosh: {{ talaba.yosh }}) - 
+            <a href="{% url 'update' talaba.pk %}">✏️ Tahrirlash</a> | 
+            <a href="{% url 'delete' talaba.pk %}" style="color: red;">🗑️ O'chirish</a>
+        </li>
+    {% empty %}
+        <p>Hozircha talabalar yo'q.</p>
+    {% endfor %}
+</ul>
