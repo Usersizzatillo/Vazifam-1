@@ -3,23 +3,21 @@ import sqlite3
 import telebot
 from telebot import types
 
-# 7-qatorni shundoq mana bu ko'rinishda qo'shtirnoq bilan yozing:
+# 1. Bot tokenini sozlash
 BOT_TOKEN = "8777272457:AAED5CWzd2ewmHYig5BVthb_0MX16dpFFxk"
 bot = telebot.TeleBot(BOT_TOKEN)
-# Ma'lumotlar bazasi yo'li (Django db.sqlite3 fayli)
-# bot.py fayli 'main' papkasida turgani uchun bazani bitta yuqori papkadan qidiradi
-DB_PATH = os.path.join(
-    os.path.dirname(os.path.dirname(__file__)), "db.sqlite3"
-)
 
+# 2. Ma'lumotlar bazasi yo'lini to'g'rilash (Django db.sqlite3 fayli uchun)
+# Bot 'main' papkasida turinganligi sababli, bitta yuqori papkadagi bazaga ulanadi
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DB_PATH = os.path.join(BASE_DIR, "db.sqlite3")
 
 def get_db_connection():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
 
-
-# Boshlang'ich tugmalar
+# 3. Boshlang'ich tugmalar paneli
 def main_keyboard():
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     btn1 = types.KeyboardButton("📋 Talabalar ro'yxati")
@@ -27,121 +25,65 @@ def main_keyboard():
     markup.add(btn1, btn2)
     return markup
 
-
-# /start buyrug'i
+# 4. /start buyrug'i
 @bot.message_handler(commands=["start"])
 def send_welcome(message):
+    user_name = message.from_user.first_name if message.from_user.first_name else "Foydalanuvchi"
     bot.send_message(
         message.chat.id,
-        f"Salom, {message.from_user.first_name}!\nTalabalarni boshqarish botiga xush kelibsiz.",
-        reply_markup=main_keyboard(),
+        f"Salom, {user_name}!\nTalabalarni boshqarish botiga xush kelibsiz.",
+        reply_markup=main_keyboard()
     )
 
-
-# 1. Talabalar ro'yxatini ko'rish
-@bot.message_handler(
-    func=lambda message: message.text == "📋 Talabalar ro'yxati"
-)
-def list_students(message):
+# 5. Talabalar ro'yxatini ko'rish handler (Saytga avtomatik ulanadi)
+@bot.message_handler(func=lambda message: message.text == "📋 Talabalar ro'yxati")
+def show_students_list(message):
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-        # Sizning bazangizdagi jadval nomi: main_talaba
+        
+        # Django odatda jadval nomini 'appname_modelname' ko'rinishida saqlaydi -> main_talaba
+        # Hamma ustunlarni (id, ism, familiya, guruh) yuklab olamiz
         cursor.execute("SELECT id, ism, familiya, guruh FROM main_talaba")
-        rows = cursor.fetchall()
+        students = cursor.fetchall()
         conn.close()
-
-        if not rows:
-            bot.send_message(message.chat.id, "Hozircha talabalar yo'q.")
+        
+        if not students:
+            bot.send_message(message.chat.id, "Hozircha bazada talabalar mavjud emas.")
             return
-
-        response = "🎓 **Talabalar ro'yxati:**\n\n"
-        for row in rows:
-            response += f"🆔 {row['id']} | 👤 {row['ism']} {row['familiya']} - Guruh: {row['guruh']}\n"
-
-        bot.send_message(message.chat.id, response, parse_mode="Markdown")
-
-    except Exception as e:
+            
+        text = "🎓 **Talabalar ro'yxati (Saytdan yangilangan):**\n\n"
+        for student in students:
+            # Har bir ustunni Django modeli formatida to'g'ri o'qiymiz
+            student_id = student["id"]
+            ism = student["ism"]
+            familiya = student["familiya"] if student["familiya"] else ""
+            guruh = student["guruh"] if student["guruh"] else "Kiritilmagan"
+            
+            text += f"🆔 {student_id} | 👤 {ism} {familiya} - Guruh: {guruh}\n"
+            
+        bot.send_message(message.chat.id, text, parse_mode="Markdown")
+        
+    except sqlite3.OperationalError as e:
         bot.send_message(
-            message.chat.id,
-            f"Xatolik yuz berdi. Baza hali yaratilmagan yoki yo'l xato: {e}",
+            message.chat.id, 
+            "Xatolik: Django jadvali topilmadi. Jadval nomini tekshiring!"
         )
+    except Exception as e:
+        bot.send_message(message.chat.id, f"Xatolik yuz berdi: {str(e)}")
 
-
-# 2. Yangi talaba qo'shish jarayoni
-user_data = {}
-
-
-@bot.message_handler(
-    func=lambda message: message.text == "➕ Yangi talaba qo'shish"
-)
-def add_student_start(message):
-    msg = bot.send_message(
-        message.chat.id,
-        "Talabaning ismini kiriting:",
-        reply_markup=types.ReplyKeyboardRemove(),
+# 6. Yangi talaba qo'shish tugmasi handler
+@bot.message_handler(func=lambda message: message.text == "➕ Yangi talaba qo'shish")
+def ask_student_info(message):
+    text = (
+        "Telegram bot orqali talaba qo'shish hozircha FSM (State) tizimida sozlangan.\n\n"
+        "Yangi talabalarni brauzer orqali paneldan qo'shishingiz mumkin:\n"
+        "🔗 http://127.0.0.1:8000/yangi/\n\n"
+        "Saytdan qo'shganingizdan so'ng, yuqoridagi **📋 Talabalar ro'yxati** tugmasini bossangiz, shu zahoti botda ham paydo bo'ladi!"
     )
-    bot.register_next_step_handler(msg, process_ism)
+    bot.send_message(message.chat.id, text)
 
-
-def process_ism(message):
-    chat_id = message.chat.id
-    user_data[chat_id] = {"ism": message.text}
-    msg = bot.send_message(chat_id, "Talabaning familiyasini kiriting:")
-    bot.register_next_step_handler(msg, process_familiya)
-
-
-def process_familiya(message):
-    chat_id = message.chat.id
-    user_data[chat_id]["familiya"] = message.text
-    msg = bot.send_message(chat_id, "Guruhini kiriting (masalan: FNU-1):")
-    bot.register_next_step_handler(msg, process_guruh)
-
-
-def process_guruh(message):
-    chat_id = message.chat.id
-    user_data[chat_id]["guruh"] = message.text
-    msg = bot.send_message(chat_id, "Yoshini kiriting (faqat son):")
-    bot.register_next_step_handler(msg, process_yosh)
-
-
-def process_yosh(message):
-    chat_id = message.chat.id
-    try:
-        yosh = int(message.text)
-        user_data[chat_id]["yosh"] = yosh
-
-        # Ma'lumotlarni main_talaba jadvaliga yozish
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute(
-            "INSERT INTO main_talaba (ism, familiya, guruh, yosh, faol) VALUES (?, ?, ?, ?, ?)",
-            (
-                user_data[chat_id]["ism"],
-                user_data[chat_id]["familiya"],
-                user_data[chat_id]["guruh"],
-                user_data[chat_id]["yosh"],
-                1,  # faol = True (1)
-            ),
-        )
-        conn.commit()
-        conn.close()
-
-        bot.send_message(
-            chat_id,
-            "🎉 Talaba muvaffaqiyatli qo'shildi va Django bazasiga saqlandi!",
-            reply_markup=main_keyboard(),
-        )
-        del user_data[chat_id]
-    except ValueError:
-        msg = bot.send_message(chat_id, "Xato! Iltimos yoshini sonda kiriting:")
-        bot.register_next_step_handler(msg, process_yosh)
-    except Exception as e:
-        bot.send_message(
-            chat_id, f"Bazaga yozishda xato: {e}", reply_markup=main_keyboard()
-        )
-
-
-# Botni uzluksiz ishga tushirish
-print("Telegram bot ishga tushdi...")
-bot.polling(none_stop=True)
+# 7. Botni doimiy ishga tushirish
+if __name__ == "__main__":
+    print("Telegram bot ishga tushdi...")
+    bot.infinity_polling()
